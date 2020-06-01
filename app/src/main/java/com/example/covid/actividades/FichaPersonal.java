@@ -18,34 +18,43 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import com.example.covid.entidades.Departamentos;
+import com.example.covid.servicios.ProyectoService;
+import com.example.covid.util.ConnectionRest;
+import com.loopj.android.http.*;
 
 import com.example.covid.R;
 import com.example.covid.entidades.TipoDocumento;
-import com.example.covid.servicios.ProyectoService;
-import com.example.covid.util.ConnectionRest;
-import com.google.android.material.textfield.TextInputLayout;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import cz.msebera.android.httpclient.Header;
+
+
+
+
 
 public class FichaPersonal extends AppCompatActivity implements View.OnClickListener {
     Spinner combo_tipoDocumento, combo_ciudades, combo_distritos,combo_departamentos;
+    private AsyncHttpClient cliente;
 
     Button btnRegistrarse;
     ArrayAdapter arrayAdapter;
@@ -55,25 +64,28 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
     TextView latitud, longitud;
     EditText txtDireccion;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ficha_personal);
 
+        cliente = new AsyncHttpClient();
         combo_tipoDocumento = (Spinner)findViewById(R.id.spnTipoDocumentos);
         combo_ciudades = (Spinner)findViewById(R.id.spnCiudades);
         combo_distritos = (Spinner)findViewById(R.id.spnDistritos);
         combo_departamentos = (Spinner)findViewById(R.id.spnDepartamentos);
 
-        arrayAdapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item,opcionesSpnView);
-        combo_tipoDocumento.setAdapter(arrayAdapter);
-
+        /*arrayAdapter = new ArrayAdapter(this,android.R.layout.simple_dropdown_item_1line,opcionesSpnView);
+        combo_tipoDocumento.setAdapter(arrayAdapter);*/
         localizacion();
         //listaProviders();
         //mejorCriterio();
         //estadoGPS();
         registrarLocalizacion();
         cargaDocumentos();
+        //llenarSpinnerDocumentos();
+        llenarSpinnerDepartamentos();
 
         btnRegistrarse = findViewById(R.id.btnRegistarse);
 
@@ -149,29 +161,106 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         return true;
     }
 
-    public void cargaDocumentos(){
+
+    private void llenarSpinnerDocumentos(){
+        String url = "http://localhost:8080/api/usuarioscasos/documentos";
+        cliente.post(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                if(statusCode == 200){
+                    cargarSpinnerDocumentos(new String(responseBody));
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+
+            }
+        });
+    }
+
+    private void cargarSpinnerDocumentos(String respuesta){
+        ArrayList<TipoDocumento> lista = new ArrayList<TipoDocumento>();
+        try {
+            JSONArray jsonArreglo = new JSONArray(respuesta);
+            for (int i=0; i < jsonArreglo.length(); i++){
+                TipoDocumento td = new TipoDocumento();
+                td.setNombreDocumento(jsonArreglo.getJSONObject(i).getString("nombre_documento"));
+                lista.add(td);
+            }
+            ArrayAdapter<TipoDocumento> a =  new ArrayAdapter <TipoDocumento>(this,android.R.layout.simple_dropdown_item_1line, lista);
+            combo_tipoDocumento.setAdapter(a);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void llenarSpinnerDepartamentos(){
+        String url = "http://localhost:8080/api/usuarioscasos/departamentos";
+        cliente.post(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                if(statusCode == 200){
+                    cargarSpinnerDepartamentos(new String(responseBody));
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+
+            }
+        });
+    }
+
+    private void cargarSpinnerDepartamentos(String respuesta){
+        ArrayList<Departamentos> lista = new ArrayList<Departamentos>();
+        try {
+            JSONArray jsonArreglo = new JSONArray(respuesta);
+            for (int i=0; i < jsonArreglo.length(); i++){
+                Departamentos td = new Departamentos();
+                td.setNombreDepartamento(jsonArreglo.getJSONObject(i).getString("nombre_departamento"));
+                lista.add(td);
+            }
+            ArrayAdapter<Departamentos> a =  new ArrayAdapter <Departamentos>(this,android.R.layout.simple_dropdown_item_1line, lista);
+            combo_departamentos.setAdapter(a);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+   public void cargaDocumentos(){
         //Se obtiene la solicitud REST
         ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
         Call<List<TipoDocumento>> call = postService.getTipoDocumentos();
         call.enqueue(new Callback<List<TipoDocumento>>() {
             @Override
             public void onResponse(Call<List<TipoDocumento>> call, Response<List<TipoDocumento>> response) {
-                Log.i("cargaDocumentos" , "-----> ");
-                Log.i("cargaDocumentos" , "-----> " + response.body());
-
-                documentos = response.body();
-                //Se agrega de usuarios al listview
-                for(TipoDocumento x : documentos) {
-                    opcionesSpnView.add(x.getId() + "->" + x.getNombreDocumento());
+                ArrayList<TipoDocumento> lista=new ArrayList<TipoDocumento>();
+                if(response.isSuccessful()){
+                    try {
+                        final List<TipoDocumento> com = response.body();
+                        for (int i = 0; i < com.size(); i++) {
+                            TipoDocumento reg=new TipoDocumento();
+                            reg.setNombreDocumento(com.get(i).getNombreDocumento());
+                            lista.add(reg);
+                        }
+                        String[] result = TextUtils.join(",",lista).split(",");
+                        Spinner combo_documentos=(Spinner) findViewById(R.id.spnTipoDocumentos);
+                        combo_documentos.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }else
+                {
+                    Log.i("Base","El metodo ha fallado" + response.errorBody());
                 }
-                //Se actualiza el listview
-                arrayAdapter.notifyDataSetChanged();
             }
             @Override
             public void onFailure(Call<List<TipoDocumento>> call, Throwable t) {
-                Log.i("MuestraPost" , t.getMessage());
+
             }
         });
+
     }
 
     private void registrarLocalizacion() {

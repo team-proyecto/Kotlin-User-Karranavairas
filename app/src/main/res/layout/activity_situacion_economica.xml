@@ -18,18 +18,15 @@
             android:layout_height="wrap_content"
             android:text="¿Usted ha sido beneficiario para el COVID-19?" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <EditText
+            android:id="@+id/txtMonto"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:boxBackgroundMode="outline"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:visibility="invisible"
-            android:hint="Ingrese monto">
+            android:ems="10"
+            android:hint="Ingrese el monto recibido" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/tilMonto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,7 +38,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="40dp"
-                    android:visibility="invisible"
                     android:text="Ingrese imagen de su recibo" />
 
                 <ImageView
@@ -49,18 +45,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="80dp"
-                    android:visibility="invisible"
                     app:srcCompat="@drawable/nodisponible" />
 
                 <Button
-                    android:id="@+id/btnImagen"
+                    android:id="@+id/btnTomarFoto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="80dp"
-                    android:text="Seleccione Imagen"
-                    android:visibility="invisible" />
+                    android:layout_marginTop="30dp"
+                    android:text="Tomar Foto" />
+
+
+
+                <Button
+                    android:id="@+id/btnSeleccionarImagen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Seleccionar Imagen" />
             </LinearLayout>
-        </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>
 </RelativeLayout>

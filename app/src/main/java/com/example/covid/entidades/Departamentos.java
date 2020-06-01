@@ -5,6 +5,15 @@ public class Departamentos {
     private int id;
     private String nombreDepartamento;
 
+    public Departamentos(){
+
+    }
+
+    public Departamentos(int id, String nombreDepartamento) {
+        this.id = id;
+        this.nombreDepartamento = nombreDepartamento;
+    }
+
     public int getId() {
         return id;
     }
@@ -19,5 +28,9 @@ public class Departamentos {
 
     public void setNombreDepartamento(String nombreDepartamento) {
         this.nombreDepartamento = nombreDepartamento;
+    }
+    @Override
+    public String toString(){
+        return nombreDepartamento;
     }
 }

@@ -26,35 +26,35 @@
             android:layout_marginTop="20dp"
             android:text="Llama al 106 (SAMU) o al 117 (EsSalud) si tienes algunos de estos síntomas:" />
 
-        <RadioButton
+        <TextView
             android:id="@+id/rb1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="Sensación de falta de aire o dificultad para respirar." />
 
-        <RadioButton
+        <TextView
             android:id="@+id/rb2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="Desorientación o confusión." />
 
-        <RadioButton
+        <TextView
             android:id="@+id/rb3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="Fiebre mayor a 38°C persistente por más de 2 días." />
 
-        <RadioButton
+        <TextView
             android:id="@+id/rb4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="Dolor de pecho." />
 
-        <RadioButton
+        <TextView
             android:id="@+id/rb5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
             android:text="Coloración azul en los labios (cianosis)." />
 
         <CheckBox
-            android:id="@+id/chkNoSintomas"
+            android:id="@+id/chkSintomas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"

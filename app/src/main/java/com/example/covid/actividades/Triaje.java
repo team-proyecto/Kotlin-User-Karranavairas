@@ -17,7 +17,7 @@ import com.example.covid.R;
 public class Triaje extends AppCompatActivity  {
 
     RadioButton rb1,rb2,rb3,rb4,rb5;
-    CheckBox chkNoSintomas;
+    CheckBox chkSintomas;
     Button btnEvaluacion;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +25,7 @@ public class Triaje extends AppCompatActivity  {
         setContentView(R.layout.activity_triaje);
 
 
-        chkNoSintomas=findViewById(R.id.chkNoSintomas);
+        chkSintomas=findViewById(R.id.chkSintomas);
         btnEvaluacion = findViewById(R.id.btnEvaluacion);
 
 

@@ -28,7 +28,7 @@ public class Verificacion extends AppCompatActivity {
 
         awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
-        awesomeValidation.addValidation(txtCodigo,"[1-9]{6}","Solo 6 dígitos");
+        awesomeValidation.addValidation(txtCodigo,"[1-9]{4}","Solo 4 dígitos");
 
         btnContinuar.setOnClickListener(new View.OnClickListener() {
             @Override

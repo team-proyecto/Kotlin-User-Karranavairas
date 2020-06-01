@@ -1,6 +1,7 @@
 package com.example.covid.servicios;
 
 import com.example.covid.entidades.Departamentos;
+import com.example.covid.entidades.Distritos;
 import com.example.covid.entidades.TipoDocumento;
 
 import java.util.List;
@@ -16,5 +17,8 @@ public interface ProyectoService {
 
     @GET("/departamentos")
     Call<List<Departamentos>> getDepartamentos();
+
+    @GET("/distritos")
+    Call<List<Distritos>> getDistritos();
 
 }

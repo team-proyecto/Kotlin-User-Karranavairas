@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ConnectionRest {
     private static Retrofit retrofit = null;
 
-    private static final String REST ="http://localhost:8080/api/usuarioscasos";
+    private static final String REST ="http://localhost:8080/api/usuarioscasos/";
 
 
     public static Retrofit getConnection() {
