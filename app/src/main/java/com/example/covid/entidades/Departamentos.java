@@ -1,17 +1,17 @@
 package com.example.covid.entidades;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Departamentos {
 
     private int id;
     private String nombreDepartamento;
+    private List<Provincias> provincia;
+    private boolean estado;
 
     public Departamentos(){
-
-    }
-
-    public Departamentos(int id, String nombreDepartamento) {
-        this.id = id;
-        this.nombreDepartamento = nombreDepartamento;
+        this.provincia = new ArrayList<>();
     }
 
     public int getId() {
@@ -29,6 +29,23 @@ public class Departamentos {
     public void setNombreDepartamento(String nombreDepartamento) {
         this.nombreDepartamento = nombreDepartamento;
     }
+
+    public List<Provincias> getProvincias() {
+        return provincia;
+    }
+
+    public void setProvincias(List<Provincias> provincia) {
+        this.provincia = provincia;
+    }
+
+    public boolean getEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
+    }
+
     @Override
     public String toString(){
         return nombreDepartamento;

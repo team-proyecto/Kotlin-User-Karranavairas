@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,19 +29,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.covid.entidades.Departamentos;
 import com.example.covid.entidades.Distritos;
+import com.example.covid.entidades.Nacionalidad;
 import com.example.covid.entidades.Provincias;
+import com.example.covid.entidades.UsuarioCasos;
 import com.example.covid.servicios.ProyectoService;
 import com.example.covid.util.ConnectionRest;
 import com.loopj.android.http.*;
@@ -48,47 +47,41 @@ import com.loopj.android.http.*;
 import com.example.covid.R;
 import com.example.covid.entidades.TipoDocumento;
 
-import org.json.JSONArray;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-
-import cz.msebera.android.httpclient.Header;
-
-
-
 
 
 public class FichaPersonal extends AppCompatActivity implements View.OnClickListener {
-    Spinner combo_tipoDocumento, combo_ciudades, combo_distritos,combo_departamentos;
+    Spinner combo_tipoDocumento, combo_provincias, combo_distritos,combo_departamentos, combo_nacionalidad;
     private AsyncHttpClient cliente;
 
+    private ProyectoService postService;
+    private static final String TAG = "LogsAndroid";
     Button btnRegistrarse;
     ArrayAdapter arrayAdapter;
     ArrayList<String> opcionesSpnView = new ArrayList<String>();
     List<TipoDocumento> documentos = new ArrayList<TipoDocumento>();
     private LocationManager ubicacion;
     TextView latitud, longitud;
-    EditText txtID,txtNombres, txtApellidos,txtNacionalidad,txtDNI,txtNacimiento,txtTelefono ,txtDireccion;
+    EditText txtID,txtNombres, txtApellidos,txtDNI,txtNacimiento,txtTelefono ,txtDireccion;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ficha_personal);
-
+        final Date date = new Date();
         cliente = new AsyncHttpClient();
         combo_tipoDocumento = (Spinner)findViewById(R.id.spnTipoDocumentos);
-        combo_ciudades = (Spinner)findViewById(R.id.spnCiudades);
-        combo_distritos = (Spinner)findViewById(R.id.spnDistritos);
+        combo_provincias = (Spinner)findViewById(R.id.spnProvincias);
+        combo_distritos = (Spinner)findViewById(R.id.spnProvincias);
         combo_departamentos = (Spinner)findViewById(R.id.spnDepartamentos);
         txtNombres = (EditText)findViewById(R.id.txtNombres);
         txtApellidos = (EditText)findViewById(R.id.txtApellidos);
-        txtNacionalidad = (EditText)findViewById(R.id.txtNacionalidad);
+        combo_nacionalidad = (Spinner)findViewById(R.id.spnNacionalidad);
         txtDNI = (EditText)findViewById(R.id.txtDNI);
         txtNacimiento = (EditText)findViewById(R.id.txtNacimiento);
         txtTelefono = (EditText)findViewById(R.id.txtTelefono);
@@ -102,53 +95,91 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         //estadoGPS();
         registrarLocalizacion();
         cargaDocumentos();
-        cargaDistritos();
+        //cargaDistritos();
+        cargaNacionalidad();
+        //cargaProvincia();
         cargaDepartamentos();
+
+
+        combo_departamentos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        //Cargar Provincia a Seleccionar un Departamento
+                Long idDepartamento = combo_departamentos.getSelectedItemId();
+                if (idDepartamento != null){
+                    cargaProvincia(idDepartamento);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        combo_provincias.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Cargar Provincia a Seleccionar un Departamento
+                Long idProvincia = combo_provincias.getSelectedItemId();
+                if (idProvincia != null){
+                    cargaDistritos(idProvincia);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         btnRegistrarse = findViewById(R.id.btnRegistarse);
         btnRegistrarse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ejecutarServicio("http://localhost:8080/api/usuarioscasos");
+                /*Intent intent = new Intent(getApplicationContext(), Menu.class);
+                startActivity(intent);*/
+
+                String nombre = txtNombres.getText().toString().trim();
+                String apellidos = txtApellidos.getText().toString().trim();
+                String dni = txtDNI.getText().toString().trim();
+                int nacionalidad = combo_nacionalidad.getSelectedItemPosition();
+                int distritos = combo_distritos.getSelectedItemPosition();
+                int documentos = combo_tipoDocumento.getSelectedItemPosition();
+                String nacimiento = txtNacimiento.getText().toString().trim();
+                String telefono = txtTelefono.getText().toString().trim();
+                String direccion = txtDireccion.getText().toString().trim();
+                //Nacionalidad es combo lo estas poniendo como text
+                //pensaba que se ingresaba, ya es´ta
+
+                SimpleDateFormat fecha= new SimpleDateFormat("yyyy-MM-dd");
+                String sFecha = fecha.format(nacimiento);
+                Date dat=new Date();
+                try {
+                    dat = fecha.parse(sFecha);
+                UsuarioCasos obj =new UsuarioCasos();
+                obj.setNombre(nombre);
+                obj.setApellidos(apellidos);
+                Nacionalidad nacional=new Nacionalidad();
+                nacional.setId(nacionalidad);
+                obj.setNacionalidad(nacional);
+                TipoDocumento documento = new TipoDocumento();
+                documento.setId(documentos);
+                obj.setTipoDocumento(documento);
+                obj.setNumeroDocumento(dni);
+                obj.setFechaNacimiento(dat);
+                Distritos dist = new Distritos();
+                dist.setId(distritos);
+                obj.setDistritos(dist);
+                obj.setTelefono(telefono);
+                obj.setDireccionDomicilio(direccion);
+                registrarUsuarioCasos(obj);
+                } catch (Exception e ){
+                    e.printStackTrace();
+                }
             }
         });
 
-    }
-
-    private void ejecutarServicio(String URL){
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new com.android.volley.Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Toast.makeText(getApplicationContext(), "OPERACION EXITOSA", Toast.LENGTH_SHORT).show();
-            }
-        }, new com.android.volley.Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
-            }
-        }){
-            protected Map<String, String> getParams() throws AuthFailureError{
-                Map<String, String> parametros = new HashMap<String, String>();
-                TipoDocumento documento = new TipoDocumento();
-                Distritos distritos = new Distritos();
-                Provincias provincias = new Provincias();
-                Departamentos departamentos = new Departamentos();
-                parametros.put("idCliente", txtID.getText().toString());
-                parametros.put("nombres", txtNombres.getText().toString());
-                parametros.put("apellidos", txtApellidos.getText().toString());
-                parametros.put("nacionalidad", txtNacionalidad.getText().toString());
-                parametros.put("tipoDocumento", documento.getNombreDocumento());
-                parametros.put("dni", txtDNI.getText().toString());
-                parametros.put("nombreDistrito", distritos.getNombreDistrito());
-                parametros.put("nombreProvincia", provincias.getNombreProvincia());
-                parametros.put("nombreDepartamento", departamentos.getNombreDepartamento());
-                parametros.put("txtTelefono", txtTelefono.getText().toString());
-                parametros.put("txtDireccion", txtDireccion.getText().toString());
-                return parametros;
-            }
-        };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequest);
     }
 
     @Override
@@ -169,6 +200,8 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         dialog.show();
     }
 
+
+
     private void localizacion() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{
@@ -186,8 +219,6 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         if (ubicacion != null) {
             Log.d("Latitud", String.valueOf(loc.getLatitude()));
             Log.d("Longitud", String.valueOf(loc.getLongitude()));
-            //latitud.setText(String.valueOf(loc.getLatitude()));
-            //longitud.setText(String.valueOf(loc.getLongitude()));
         }
     }
 
@@ -259,22 +290,31 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
 
     }
 
-    public void cargaDistritos(){
+    public void cargaDistritos(Long id){
         //Se obtiene la solicitud REST
         ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
-        Call<List<Distritos>> call = postService.getDistritos();
-        call.enqueue(new Callback<List<Distritos>>() {
+        id = combo_provincias.getSelectedItemId();
+        Call<Provincias> call = postService.getDistritos(id);
+        call.enqueue(new Callback<Provincias>() {
             @Override
-            public void onResponse(Call<List<Distritos>> call, Response<List<Distritos>> response) {
+            public void onResponse(Call<Provincias> call, Response<Provincias> response) {
                 ArrayList<Distritos> lista=new ArrayList<Distritos>();
                 if(response.isSuccessful()){
                     try {
-                        final List<Distritos> com = response.body();
-                        for (int i = 0; i < com.size(); i++) {
-                            Distritos reg=new Distritos();
-                            reg.setNombreDistrito(com.get(i).getNombreDistrito());
+                        final Provincias com = response.body(); // Esto es json completo
+                        for( Distritos item: com.getDistritos() ) {
+                            Distritos reg = new Distritos();
+                            reg.setId(item.getId());
+                            reg.setNombreDistrito(item.getNombreDistrito());
                             lista.add(reg);
                         }
+
+                        /*for (int i = 0; i < com.getProvincias().size(); i++) {
+                            Provincias reg=new Provincias();
+                            reg.setId(com.get);
+                            reg.setNombreProvincia(com.getNombreProvincia());
+                            lista.add(reg);
+                        }*/
                         String[] result = TextUtils.join(",",lista).split(",");
                         Spinner combo_distritos=(Spinner) findViewById(R.id.spnDistritos);
                         combo_distritos.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
@@ -287,7 +327,7 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
                 }
             }
             @Override
-            public void onFailure(Call<List<Distritos>> call, Throwable t) {
+            public void onFailure(Call<Provincias> call, Throwable t) {
 
             }
         });
@@ -307,12 +347,15 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
                         final List<Departamentos> com = response.body();
                         for (int i = 0; i < com.size(); i++) {
                             Departamentos reg=new Departamentos();
+                            //cargaProvincia(com.get(i).getId());
+                            reg.setId(com.get(i).getId());
                             reg.setNombreDepartamento(com.get(i).getNombreDepartamento());
                             lista.add(reg);
                         }
                         String[] result = TextUtils.join(",",lista).split(",");
                         Spinner combo_departamentos=(Spinner) findViewById(R.id.spnDepartamentos);
                         combo_departamentos.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
+
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -327,6 +370,106 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
             }
         });
 
+    }
+
+    public void cargaProvincia(Long id){
+        //Se obtiene la solicitud REST
+        ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
+        id = combo_departamentos.getSelectedItemId();
+        Call<Departamentos> call = postService.getProvincias(id);
+        call.enqueue(new Callback<Departamentos>() {
+            @Override
+            public void onResponse(Call<Departamentos> call, Response<Departamentos> response) {
+                ArrayList<Provincias> lista=new ArrayList<Provincias>();
+                if(response.isSuccessful()){
+                    try {
+                        final Departamentos com = response.body(); // Esto es json completo
+                        for( Provincias item: com.getProvincias() ) {
+                            Provincias reg = new Provincias();
+                            reg.setId(item.getId());
+                            reg.setNombreProvincia(item.getNombreProvincia());
+                            lista.add(reg);
+                        }
+
+                        /*for (int i = 0; i < com.getProvincias().size(); i++) {
+                            Provincias reg=new Provincias();
+                            reg.setId(com.get);
+                            reg.setNombreProvincia(com.getNombreProvincia());
+                            lista.add(reg);
+                        }*/
+                        String[] result = TextUtils.join(",",lista).split(",");
+                        Spinner combo_provincias=(Spinner) findViewById(R.id.spnProvincias);
+                        combo_provincias.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }else
+                {
+                    Log.i("Base","El metodo ha fallado" + response.errorBody());
+                }
+            }
+            @Override
+            public void onFailure(Call<Departamentos> call, Throwable t) {
+
+            }
+        });
+
+    }
+    public void cargaNacionalidad(){
+        //Se obtiene la solicitud REST
+        ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
+        Call<List<Nacionalidad>> call = postService.getNacionalidades();
+        call.enqueue(new Callback<List<Nacionalidad>>() {
+            @Override
+            public void onResponse(Call<List<Nacionalidad>> call, Response<List<Nacionalidad>> response) {
+                ArrayList<Nacionalidad> lista=new ArrayList<Nacionalidad>();
+                if(response.isSuccessful()){
+                    try {
+                        final List<Nacionalidad> com = response.body();
+                        for (int i = 0; i < com.size(); i++) {
+                            Nacionalidad reg=new Nacionalidad();
+                            reg.setNombreNacionalidad(com.get(i).getNombreNacionalidad());
+                            lista.add(reg);
+                        }
+                        String[] result = TextUtils.join(",",lista).split(",");
+                        Spinner combo_nacionalidades=(Spinner) findViewById(R.id.spnNacionalidad);
+                        combo_nacionalidades.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }else
+                {
+                    Log.i("Base","El metodo ha fallado" + response.errorBody());
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Nacionalidad>> call, Throwable t) {
+
+            }
+        });
+
+    }
+
+    private void registrarUsuarioCasos(UsuarioCasos obj){
+        postService = ConnectionRest.getConnection().create(ProyectoService.class);
+        Call<UsuarioCasos> call =postService.saveUsuariosCasos(obj);
+
+        call.enqueue(new Callback<UsuarioCasos>() {
+            @Override
+            public void onResponse(Call<UsuarioCasos> call, Response<UsuarioCasos> response) {
+                if (!response.isSuccessful()){
+                    Log.i(TAG, "Post Subido al API" + response.body().toString());
+                }else{
+                    Log.i(TAG, "Algo salio mal" + response.body().toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UsuarioCasos> call, Throwable t) {
+                    Log.i(TAG, "Improbable subir POST al API");
+                    Toast.makeText(FichaPersonal.this, "UsuarioCasos Registrado (ver retorno)", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void registrarLocalizacion() {
@@ -370,5 +513,8 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         public void onProviderDisabled(String provider) {
 
         }
+
     }
+
+
 }

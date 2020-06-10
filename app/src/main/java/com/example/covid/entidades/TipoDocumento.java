@@ -4,6 +4,7 @@ public class TipoDocumento {
 
 private int id;
 private String nombreDocumento;
+private boolean estado;
 
     public TipoDocumento(){
 
@@ -27,6 +28,14 @@ private String nombreDocumento;
 
     public void setNombreDocumento(String nombreDocumento) {
         this.nombreDocumento = nombreDocumento;
+    }
+
+    public boolean getEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
     }
 
     @Override
