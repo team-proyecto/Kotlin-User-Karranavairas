@@ -11,8 +11,8 @@ public class UsuarioCasos {
     private int dni;
     private Date fechaNacimiento;
     private Distritos distrito;
-    private Provincias nombreProvincia;
-    private Departamentos nombreDepartamento;
+    //private Provincias nombreProvincia;
+    //private Departamentos nombreDepartamento;
     private String telefono;
     private String direccionDomicilio;
     private int codigoConfirmacion;
@@ -25,9 +25,12 @@ public class UsuarioCasos {
     private ReporteMedico reporteMedico;
     private boolean estado;
 
+
     public void prePersist() {
         this.fechaRegistro = new Date();
     }
+
+
 
     public int getId() {
         return id;
@@ -93,7 +96,7 @@ public class UsuarioCasos {
         this.distrito = distrito;
     }
 
-    public Provincias getNombreProvincia() {
+    /*public Provincias getNombreProvincia() {
         return nombreProvincia;
     }
 
@@ -107,7 +110,7 @@ public class UsuarioCasos {
 
     public void setNombreDepartamento(Departamentos nombreDepartamento) {
         this.nombreDepartamento = nombreDepartamento;
-    }
+    }*/
 
     public String getTelefono() {
         return telefono;
@@ -133,7 +136,7 @@ public class UsuarioCasos {
         this.codigoConfirmacion = codigoConfirmacion;
     }
 
-    public boolean isCondicionUso() {
+    public boolean getCondicionUso() {
         return condicionUso;
     }
 

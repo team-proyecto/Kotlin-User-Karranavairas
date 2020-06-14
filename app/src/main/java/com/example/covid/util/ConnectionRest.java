@@ -6,7 +6,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ConnectionRest {
     private static Retrofit retrofit = null;
 
-    private static final String REST ="http://localhost:8080/api/";
+    //private static final String REST ="http://localhost:8090/api/";
+    private static final String REST ="http://api-corona-spring.herokuapp.com/api/";
+
 
 
     public static Retrofit getConnection() {

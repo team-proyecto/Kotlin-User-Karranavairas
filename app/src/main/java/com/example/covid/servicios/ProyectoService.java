@@ -13,6 +13,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ProyectoService {
@@ -24,9 +25,11 @@ public interface ProyectoService {
     @GET("usuarioscasos/departamentos")
     Call<List<Departamentos>> getDepartamentos();
 
-    @GET("usuarioscasos/departamento/{id}")
+    //trae un departamento con sus provincias
+    @GET("usuarioscasos/departamentos/{id}")
     Call<Departamentos> getProvincias(@Path(value="id") Long id);
 
+    //trae una provincia con sus distritos
     @GET("usuarioscasos/provincias/{id}")
     Call<Provincias> getDistritos(@Path(value="id") Long id);
 
@@ -35,5 +38,12 @@ public interface ProyectoService {
 
     @POST("usuarioscasos")
     Call<UsuarioCasos> saveUsuariosCasos(@Body UsuarioCasos obj);
+
+    @PUT("usuarioscasos/{id}")
+    Call<UsuarioCasos> updateUsuariosCasos(@Path(value="id") Long id, @Body UsuarioCasos obj);
+
+    @GET("usuarioscasos/{id}")
+    Call<UsuarioCasos> obtenerUsuariosCaso(@Path(value="id") Long id);
+
 
 }

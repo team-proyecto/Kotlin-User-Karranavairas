@@ -56,7 +56,7 @@ import java.util.Locale;
 
 public class FichaPersonal extends AppCompatActivity implements View.OnClickListener {
     Spinner combo_tipoDocumento, combo_provincias, combo_distritos,combo_departamentos, combo_nacionalidad;
-    private AsyncHttpClient cliente;
+    //private AsyncHttpClient cliente;
 
     private ProyectoService postService;
     private static final String TAG = "LogsAndroid";
@@ -74,7 +74,7 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ficha_personal);
         final Date date = new Date();
-        cliente = new AsyncHttpClient();
+        //cliente = new AsyncHttpClient();
         combo_tipoDocumento = (Spinner)findViewById(R.id.spnTipoDocumentos);
         combo_provincias = (Spinner)findViewById(R.id.spnProvincias);
         combo_distritos = (Spinner)findViewById(R.id.spnProvincias);
@@ -97,7 +97,7 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         cargaDocumentos();
         //cargaDistritos();
         cargaNacionalidad();
-        //cargaProvincia();
+        //cargaProvincia((long) 1);
         cargaDepartamentos();
 
 
@@ -132,6 +132,22 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
 
             }
         });
+
+        /*combo_distritos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Cargar Provincia a Seleccionar un Distrito
+                Long idDistrito = combo_distritos.getSelectedItemId();
+                if (idDistrito != null){
+                    cargaDistritos(idDistrito);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });*/
 
         btnRegistrarse = findViewById(R.id.btnRegistarse);
         btnRegistrarse.setOnClickListener(new View.OnClickListener() {
@@ -290,11 +306,117 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
 
     }
 
+
+
+    public void cargaDepartamentos(){
+        //Se obtiene la solicitud REST
+        ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
+        Call<List<Departamentos>> call = postService.getDepartamentos();
+        Log.i(TAG, "PASO 1_departamentos");
+        call.enqueue(new Callback<List<Departamentos>>() {
+            @Override
+            public void onResponse(Call<List<Departamentos>> call, Response<List<Departamentos>> response) {
+                ArrayList<Departamentos> lista=new ArrayList<Departamentos>();
+                Log.i(TAG, "PASO 2_departamentos");
+                if(response.isSuccessful()){
+                    Log.i(TAG, "PASO 3_departamentos");
+                    try {
+                        Log.i(TAG, "PASO 4_departamentos");
+                        final List<Departamentos> com = response.body();
+                        Log.i(TAG, "PASO 4.1_departamentos" + com);
+                        for (int i = 0; i < com.size(); i++) {
+                            Departamentos reg=new Departamentos();
+                            //cargaProvincia(com.get(i).getId());
+                            reg.setId(com.get(i).getId());
+                            reg.setNombreDepartamento(com.get(i).getNombreDepartamento());
+                            lista.add(reg);
+                            Log.i(TAG, "PASO 5_departamentos" + reg);
+                        }
+
+                        String[] result = TextUtils.join(",",lista).split(",");
+                        Spinner combo_departamentos=(Spinner) findViewById(R.id.spnDepartamentos);
+                        combo_departamentos.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
+                        Log.i(TAG, "PASO 6_departamentos");
+
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }else
+                {
+                    Log.i("Base","El metodo ha fallado" + response.errorBody());
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Departamentos>> call, Throwable t) {
+
+            }
+        });
+
+    }
+
+    public void cargaProvincia(Long id){
+        //Se obtiene la solicitud REST
+        ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
+         Long index = combo_departamentos.getSelectedItemId();
+                 //Long.valueOf(1);
+                 //combo_departamentos.getSelectedItemId();
+        Log.i(TAG, "valor de spinner departamentos" + index);
+        Call<Departamentos> call = postService.getProvincias(index);
+        Log.i(TAG, "PASO 1_provincia" + call);
+        call.enqueue(new Callback<Departamentos>() {
+            @Override
+            public void onResponse(Call<Departamentos> call, Response<Departamentos> response) {
+                ArrayList<Provincias> lista=new ArrayList<Provincias>();
+                Log.i(TAG, "PASO 2_provincia "+ call);
+                Log.i(TAG, "PASO 2_provincia "+ response);
+                Log.i(TAG, "PASO 2_provincia "+ response.body());
+                if(response.isSuccessful()){
+                    Log.i(TAG, "PASO 3_provincia");
+                    try {
+                        Log.i(TAG, "PASO 4_provincia");
+                        final Departamentos com = response.body(); // Esto es json completo
+                        Log.i(TAG, "encuentrameeeeee" + com);
+                        for( Provincias item: com.getProvincias() ) {
+
+                            Provincias reg = new Provincias();
+                            reg.setId(item.getId());
+                            reg.setNombreProvincia(item.getNombreProvincia());
+                            lista.add(reg);
+                            Log.i(TAG, "PASO 5_provincia" + reg);
+                        }
+
+                        /*for (int i = 0; i < com.getProvincias().size(); i++) {
+                            Provincias reg=new Provincias();
+                            reg.setId(com.get);
+                            reg.setNombreProvincia(com.getNombreProvincia());
+                            lista.add(reg);
+                        }*/
+                        String[] result = TextUtils.join(",",lista).split(",");
+                        Spinner combo_provincias=(Spinner) findViewById(R.id.spnProvincias);
+                        combo_provincias.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
+                        Log.i(TAG, "PASO 6_provincia");
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }else
+                {
+                    Log.i("Base","El metodo ha fallado" + response.errorBody());
+                }
+            }
+            @Override
+            public void onFailure(Call<Departamentos> call, Throwable t) {
+
+            }
+        });
+
+    }
+
     public void cargaDistritos(Long id){
         //Se obtiene la solicitud REST
         ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
         id = combo_provincias.getSelectedItemId();
         Call<Provincias> call = postService.getDistritos(id);
+        Log.i(TAG, "cargaDistritos: " + call);
         call.enqueue(new Callback<Provincias>() {
             @Override
             public void onResponse(Call<Provincias> call, Response<Provincias> response) {
@@ -334,87 +456,6 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
 
     }
 
-    public void cargaDepartamentos(){
-        //Se obtiene la solicitud REST
-        ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
-        Call<List<Departamentos>> call = postService.getDepartamentos();
-        call.enqueue(new Callback<List<Departamentos>>() {
-            @Override
-            public void onResponse(Call<List<Departamentos>> call, Response<List<Departamentos>> response) {
-                ArrayList<Departamentos> lista=new ArrayList<Departamentos>();
-                if(response.isSuccessful()){
-                    try {
-                        final List<Departamentos> com = response.body();
-                        for (int i = 0; i < com.size(); i++) {
-                            Departamentos reg=new Departamentos();
-                            //cargaProvincia(com.get(i).getId());
-                            reg.setId(com.get(i).getId());
-                            reg.setNombreDepartamento(com.get(i).getNombreDepartamento());
-                            lista.add(reg);
-                        }
-                        String[] result = TextUtils.join(",",lista).split(",");
-                        Spinner combo_departamentos=(Spinner) findViewById(R.id.spnDepartamentos);
-                        combo_departamentos.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
-
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }else
-                {
-                    Log.i("Base","El metodo ha fallado" + response.errorBody());
-                }
-            }
-            @Override
-            public void onFailure(Call<List<Departamentos>> call, Throwable t) {
-
-            }
-        });
-
-    }
-
-    public void cargaProvincia(Long id){
-        //Se obtiene la solicitud REST
-        ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
-        id = combo_departamentos.getSelectedItemId();
-        Call<Departamentos> call = postService.getProvincias(id);
-        call.enqueue(new Callback<Departamentos>() {
-            @Override
-            public void onResponse(Call<Departamentos> call, Response<Departamentos> response) {
-                ArrayList<Provincias> lista=new ArrayList<Provincias>();
-                if(response.isSuccessful()){
-                    try {
-                        final Departamentos com = response.body(); // Esto es json completo
-                        for( Provincias item: com.getProvincias() ) {
-                            Provincias reg = new Provincias();
-                            reg.setId(item.getId());
-                            reg.setNombreProvincia(item.getNombreProvincia());
-                            lista.add(reg);
-                        }
-
-                        /*for (int i = 0; i < com.getProvincias().size(); i++) {
-                            Provincias reg=new Provincias();
-                            reg.setId(com.get);
-                            reg.setNombreProvincia(com.getNombreProvincia());
-                            lista.add(reg);
-                        }*/
-                        String[] result = TextUtils.join(",",lista).split(",");
-                        Spinner combo_provincias=(Spinner) findViewById(R.id.spnProvincias);
-                        combo_provincias.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_dropdown_item,result));
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }else
-                {
-                    Log.i("Base","El metodo ha fallado" + response.errorBody());
-                }
-            }
-            @Override
-            public void onFailure(Call<Departamentos> call, Throwable t) {
-
-            }
-        });
-
-    }
     public void cargaNacionalidad(){
         //Se obtiene la solicitud REST
         ProyectoService postService = ConnectionRest.getConnection().create(ProyectoService.class);
