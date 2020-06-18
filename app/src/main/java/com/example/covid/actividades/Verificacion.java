@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.example.covid.MainActivity;
 import com.example.covid.R;
 import com.example.covid.entidades.Distritos;
 import com.example.covid.entidades.Gps;
@@ -24,6 +25,10 @@ import com.example.covid.entidades.UsuarioCasos;
 import com.example.covid.servicios.ProyectoService;
 import com.example.covid.util.ConnectionRest;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,6 +40,7 @@ public class Verificacion extends AppCompatActivity {
     AwesomeValidation awesomeValidation;
     EditText txtCodigo;
     Button btnContinuar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,7 @@ public class Verificacion extends AppCompatActivity {
 
         btnContinuar = findViewById(R.id.btnContinuar);
         txtCodigo = findViewById(R.id.txtCodigo);
+
 
         awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
@@ -89,13 +96,21 @@ public class Verificacion extends AppCompatActivity {
             public void onResponse(Call<UsuarioCasos> call, Response<UsuarioCasos> response) {
                 //UsuarioCasos usuarioOriginal;
                 if (response.isSuccessful()) {
-
+                    /*SimpleDateFormat fecha= new SimpleDateFormat("yyyy-MM-dd");
+                    String sFecha = fecha.format(fecha);
+                    Date dat=new Date();*/
                     try {
 
                         final UsuarioCasos com = response.body(); // Esto es json completo
 
 
                         UsuarioCasos reg = new UsuarioCasos();
+
+                        /*UsuarioCasos global = (UsuarioCasos)getApplicationContext();
+                        global.setCodigoConfirmacion(1212);
+
+                        UsuarioCasos lectura = (UsuarioCasos)getApplicationContext();
+                        txtCodigo.setText(lectura.getCodigoConfirmacion());*/
 
                         reg.setId(com.getId());
                         reg.setNombre(com.getNombre());
@@ -108,8 +123,7 @@ public class Verificacion extends AppCompatActivity {
                         reg.setTipoDocumento(documento);
                         reg.setNumeroDocumento(com.getNumeroDocumento());
                         //reg.setFechaNacimiento(com.getFechaNacimiento());
-
-                        //Log.i(TAG, "fechanacimiento: " + com.getFechaNacimiento());
+                        //Log.i(TAG, "fechanacimiento: " + dat);
                         Distritos dist = new Distritos();
                         dist.setId(com.getDistritos().getId());
                         reg.setDistritos(dist);
@@ -118,8 +132,7 @@ public class Verificacion extends AppCompatActivity {
                         reg.setCodigoConfirmacion(com.getCodigoConfirmacion());
                         reg.setCondicionUso(com.getCondicionUso());
                         //reg.setFechaRegistro(com.getFechaRegistro());
-
-                        //Log.i(TAG, "fecharegistro: " + com.getFechaRegistro());
+                        //Log.i(TAG, "fecharegistro: " + dat;
                         Gps gps = new Gps();
                         gps.setId(com.getGps().getId());
                         reg.setGps(gps);

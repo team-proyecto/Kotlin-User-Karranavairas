@@ -1,8 +1,10 @@
 package com.example.covid.entidades;
 
+import android.app.Application;
+
 import java.util.Date;
 
-public class UsuarioCasos {
+public class UsuarioCasos extends Application {
     private int id;
     private String nombre;
     private String apellidos;

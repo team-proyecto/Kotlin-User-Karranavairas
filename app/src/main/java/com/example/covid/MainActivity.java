@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity{
 
         awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
-        awesomeValidation.addValidation(txtNumero,"[1-9]{4}","Solo 4 dígitos");
+        awesomeValidation.addValidation(txtNumero,"[1-9]{9}","Solo 9 dígitos");
 
         chkAceptar.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity{
         btnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (awesomeValidation.validate()) {
                     enviarMensaje("923001670", "Tú código de verificación es: 1234");
                     Intent intent = new Intent(getApplicationContext(), Verificacion.class);
                     startActivity(intent);
@@ -89,20 +89,20 @@ public class MainActivity extends AppCompatActivity{
                 /*SimpleDateFormat fecha= new SimpleDateFormat("yyyy-MM-dd");
                 String sFecha = fecha.format(nacimiento);
                 Date dat=new Date();*/
-                try {
-                   // dat = fecha.parse(sFecha);
-                    UsuarioCasos obj =new UsuarioCasos();
-                    obj.setTelefono(telefono);
-                    obj.setCondicionUso(condicion);
-                    registrarUsuarioCasos(obj);
+                    try {
+                        // dat = fecha.parse(sFecha);
+                        UsuarioCasos obj = new UsuarioCasos();
+                        obj.setTelefono(telefono);
+                        obj.setCondicionUso(condicion);
+                        registrarUsuarioCasos(obj);
 
-                    Log.i(TAG, "onClick: " + obj.getId());
-                } catch (Exception e ){
-                    e.printStackTrace();
+                        Log.i(TAG, "onClick: " + obj.getId());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Ingrese su número", Toast.LENGTH_SHORT).show();
                 }
-
-
-
             }
         });
 

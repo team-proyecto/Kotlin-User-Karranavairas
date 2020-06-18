@@ -8,6 +8,7 @@ import android.os.Handler;
 
 import com.example.covid.MainActivity;
 import com.example.covid.R;
+import com.example.covid.entidades.UsuarioCasos;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -15,6 +16,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        UsuarioCasos global = (UsuarioCasos)getApplicationContext();
+        global.setCodigoConfirmacion(1212);
 
         new Handler().postDelayed(new Runnable() {
             @Override

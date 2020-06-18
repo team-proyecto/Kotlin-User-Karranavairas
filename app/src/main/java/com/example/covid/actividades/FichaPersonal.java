@@ -89,7 +89,7 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
 
 
 
-        localizacion();
+        //localizacion();
         //listaProviders();
         //mejorCriterio();
         //estadoGPS();
@@ -556,6 +556,8 @@ public class FichaPersonal extends AppCompatActivity implements View.OnClickList
         }
 
     }
+
+    
 
 
 }
